@@ -1,6 +1,5 @@
--- == KUKIRIN PREMIUM SCRIPT v3 ==
--- С ползунком скорости
--- Вставь в инжектор (Roblox) и нажми Execute
+-- == KUKIRIN FIXED SCRIPT v2 ==
+-- Тёмная тема: выкл = чёрный, вкл = белый
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -10,14 +9,12 @@ local LocalPlayer = Players.LocalPlayer
 
 -- ================= НАСТРОЙКИ =================
 local CONFIG = {
-    AutoDriveSpeed = 80,
-    StuntForce     = 150,
-    BoostSpeed     = 200,
-    FlySpeed       = 100,
+    AutoDriveSpeed = 100,
+    BoostSpeed     = 300,
+    FlySpeed       = 150,
 }
 
--- Значение слайдера скорости
-local WalkSpeedValue = 1  -- начинаем с 1
+local WalkSpeedValue = 16
 local WalkSpeedMin = 1
 local WalkSpeedMax = 500
 
@@ -30,24 +27,25 @@ local State = {
     GodMode      = false,
     AntiAFK      = false,
     InfiniteJump = false,
-    SpeedApply   = false,  -- применяется ли кастомная скорость
+    SpeedApply   = false,
     AutoFlip     = false,
 }
 
 -- ================= GUI =================
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "KukirinPremiumV3"
+ScreenGui.Name = "KukirinFixedV2"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 300, 0, 500)
-MainFrame.Position = UDim2.new(0.5, -150, 0.5, -250)
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 360, 0, 560)
+MainFrame.Position = UDim2.new(0.5, -180, 0.5, -280)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 MainFrame.BackgroundTransparency = 0.05
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
-MainFrame.Draggable = true
+MainFrame.ClipsDescendants = true
 MainFrame.Parent = ScreenGui
 
 local UICorner = Instance.new("UICorner")
@@ -59,61 +57,79 @@ UIStroke.Color = Color3.fromRGB(80, 80, 80)
 UIStroke.Thickness = 1.5
 UIStroke.Parent = MainFrame
 
--- Заголовок
+-- ================= ПЕРЕТАСКИВАНИЕ =================
+local dragging = false
+local dragStart, startPos
+
+local function updateDrag(input)
+    local delta = input.Position - dragStart
+    MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
 local TitleBar = Instance.new("Frame")
-TitleBar.Size = UDim2.new(1, 0, 0, 42)
+TitleBar.Size = UDim2.new(1, 0, 0, 45)
 TitleBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 TitleBar.BorderSizePixel = 0
+TitleBar.Active = true
 TitleBar.Parent = MainFrame
 
-local TitleCorner = Instance.new("UICorner")
-TitleCorner.CornerRadius = UDim.new(0, 14)
-TitleCorner.Parent = TitleBar
+TitleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
 
-local TitleFix = Instance.new("Frame")
-TitleFix.Size = UDim2.new(1, 0, 0, 15)
-TitleFix.Position = UDim2.new(0, 0, 1, -15)
-TitleFix.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-TitleFix.BorderSizePixel = 0
-TitleFix.Parent = TitleBar
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        updateDrag(input)
+    end
+end)
 
 local TitleLabel = Instance.new("TextLabel")
 TitleLabel.Size = UDim2.new(1, 0, 1, 0)
 TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "⚡ KUKIRIN PREMIUM v3"
+TitleLabel.Text = "⚡ KUKIRIN MENU v2"
 TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleLabel.Font = Enum.Font.GothamBold
-TitleLabel.TextSize = 15
+TitleLabel.TextSize = 16
 TitleLabel.Parent = TitleBar
 
--- Скролл
+-- ================= СКРОЛЛ =================
 local Scroll = Instance.new("ScrollingFrame")
-Scroll.Size = UDim2.new(1, 0, 1, -42)
-Scroll.Position = UDim2.new(0, 0, 0, 42)
+Scroll.Size = UDim2.new(1, 0, 1, -45)
+Scroll.Position = UDim2.new(0, 0, 0, 45)
 Scroll.BackgroundTransparency = 1
 Scroll.BorderSizePixel = 0
-Scroll.ScrollBarThickness = 3
+Scroll.ScrollBarThickness = 4
 Scroll.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 100)
 Scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
 Scroll.Parent = MainFrame
 
 local ListLayout = Instance.new("UIListLayout")
-ListLayout.Padding = UDim.new(0, 6)
+ListLayout.Padding = UDim.new(0, 8)
 ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 ListLayout.Parent = Scroll
 
 local Pad = Instance.new("UIPadding")
-Pad.PaddingTop = UDim.new(0, 8)
-Pad.PaddingLeft = UDim.new(0, 8)
-Pad.PaddingRight = UDim.new(0, 8)
-Pad.PaddingBottom = UDim.new(0, 8)
+Pad.PaddingTop = UDim.new(0, 10)
+Pad.PaddingLeft = UDim.new(0, 10)
+Pad.PaddingRight = UDim.new(0, 10)
+Pad.PaddingBottom = UDim.new(0, 10)
 Pad.Parent = Scroll
 
--- ================= ФУНКЦИЯ ТУМБЛЕРА =================
+-- ================= ТУМБЛЕР (ЧЁРНЫЙ ВЫКЛ / БЕЛЫЙ ВКЛ) =================
 local function createToggle(text, callback)
     local Toggle = Instance.new("TextButton")
-    Toggle.Size = UDim2.new(1, 0, 0, 42)
-    Toggle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Toggle.Size = UDim2.new(1, 0, 0, 45)
+    -- ИЗНАЧАЛЬНО ЧЁРНЫЙ
+    Toggle.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     Toggle.Text = ""
     Toggle.AutoButtonColor = false
     Toggle.BorderSizePixel = 0
@@ -124,29 +140,31 @@ local function createToggle(text, callback)
     C.Parent = Toggle
 
     local S = Instance.new("UIStroke")
-    S.Color = Color3.fromRGB(200, 200, 200)
+    S.Color = Color3.fromRGB(80, 80, 80)
     S.Thickness = 1
     S.Parent = Toggle
 
+    -- ТЕКСТ ИЗНАЧАЛЬНО БЕЛЫЙ
     local L = Instance.new("TextLabel")
-    L.Size = UDim2.new(0.72, 0, 1, 0)
+    L.Size = UDim2.new(0.7, 0, 1, 0)
     L.Position = UDim2.new(0.05, 0, 0, 0)
     L.BackgroundTransparency = 1
     L.Text = text
-    L.TextColor3 = Color3.fromRGB(30, 30, 30)
+    L.TextColor3 = Color3.fromRGB(255, 255, 255)
     L.Font = Enum.Font.GothamBold
-    L.TextSize = 13
+    L.TextSize = 14
     L.TextXAlignment = Enum.TextXAlignment.Left
     L.Parent = Toggle
 
+    -- СТАТУС ИЗНАЧАЛЬНО СЕРЫЙ
     local St = Instance.new("TextLabel")
     St.Size = UDim2.new(0.2, 0, 1, 0)
     St.Position = UDim2.new(0.75, 0, 0, 0)
     St.BackgroundTransparency = 1
     St.Text = "ВЫКЛ"
-    St.TextColor3 = Color3.fromRGB(120, 120, 120)
+    St.TextColor3 = Color3.fromRGB(150, 150, 150)
     St.Font = Enum.Font.GothamBold
-    St.TextSize = 11
+    St.TextSize = 12
     St.Parent = Toggle
 
     local state = false
@@ -156,31 +174,40 @@ local function createToggle(text, callback)
         callback(state)
 
         if state then
-            TweenService:Create(Toggle, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {
+            -- ВКЛЮЧЕНО: плавно в БЕЛЫЙ
+            TweenService:Create(Toggle, TweenInfo.new(0.35, Enum.EasingStyle.Quad), {
+                BackgroundColor3 = Color3.fromRGB(240, 240, 240)
+            }):Play()
+            TweenService:Create(S, TweenInfo.new(0.35), {
+                Color = Color3.fromRGB(0, 220, 120)
+            }):Play()
+            TweenService:Create(L, TweenInfo.new(0.35), {
+                TextColor3 = Color3.fromRGB(20, 20, 20)
+            }):Play()
+            St.Text = "ВКЛ"
+            St.TextColor3 = Color3.fromRGB(0, 180, 100)
+        else
+            -- ВЫКЛЮЧЕНО: плавно в ЧЁРНЫЙ
+            TweenService:Create(Toggle, TweenInfo.new(0.35, Enum.EasingStyle.Quad), {
                 BackgroundColor3 = Color3.fromRGB(20, 20, 20)
             }):Play()
-            TweenService:Create(S, TweenInfo.new(0.4), {Color = Color3.fromRGB(0, 200, 100)}):Play()
-            TweenService:Create(L, TweenInfo.new(0.4), {TextColor3 = Color3.fromRGB(255,255,255)}):Play()
-            St.Text = "ВКЛ"
-            St.TextColor3 = Color3.fromRGB(0, 220, 120)
-        else
-            TweenService:Create(Toggle, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {
-                BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            TweenService:Create(S, TweenInfo.new(0.35), {
+                Color = Color3.fromRGB(80, 80, 80)
             }):Play()
-            TweenService:Create(S, TweenInfo.new(0.4), {Color = Color3.fromRGB(200,200,200)}):Play()
-            TweenService:Create(L, TweenInfo.new(0.4), {TextColor3 = Color3.fromRGB(30,30,30)}):Play()
+            TweenService:Create(L, TweenInfo.new(0.35), {
+                TextColor3 = Color3.fromRGB(255, 255, 255)
+            }):Play()
             St.Text = "ВЫКЛ"
-            St.TextColor3 = Color3.fromRGB(120, 120, 120)
+            St.TextColor3 = Color3.fromRGB(150, 150, 150)
         end
     end)
 end
 
--- ================= ФУНКЦИЯ СЛАЙДЕРА =================
+-- ================= СЛАЙДЕР (тоже тёмный) =================
 local function createSlider(labelText, minVal, maxVal, defaultVal, callback)
-    -- Контейнер
     local Box = Instance.new("Frame")
-    Box.Size = UDim2.new(1, 0, 0, 60)
-    Box.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Box.Size = UDim2.new(1, 0, 0, 70)
+    Box.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     Box.BorderSizePixel = 0
     Box.Parent = Scroll
 
@@ -189,39 +216,36 @@ local function createSlider(labelText, minVal, maxVal, defaultVal, callback)
     BC.Parent = Box
 
     local BS = Instance.new("UIStroke")
-    BS.Color = Color3.fromRGB(200, 200, 200)
+    BS.Color = Color3.fromRGB(80, 80, 80)
     BS.Thickness = 1
     BS.Parent = Box
 
-    -- Название
     local Lbl = Instance.new("TextLabel")
-    Lbl.Size = UDim2.new(0.6, 0, 0, 22)
-    Lbl.Position = UDim2.new(0.05, 0, 0, 4)
+    Lbl.Size = UDim2.new(0.6, 0, 0, 25)
+    Lbl.Position = UDim2.new(0.05, 0, 0, 5)
     Lbl.BackgroundTransparency = 1
     Lbl.Text = labelText
-    Lbl.TextColor3 = Color3.fromRGB(30, 30, 30)
+    Lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
     Lbl.Font = Enum.Font.GothamBold
-    Lbl.TextSize = 13
+    Lbl.TextSize = 14
     Lbl.TextXAlignment = Enum.TextXAlignment.Left
     Lbl.Parent = Box
 
-    -- Значение
     local ValLbl = Instance.new("TextLabel")
-    ValLbl.Size = UDim2.new(0.3, 0, 0, 22)
-    ValLbl.Position = UDim2.new(0.65, 0, 0, 4)
+    ValLbl.Size = UDim2.new(0.3, 0, 0, 25)
+    ValLbl.Position = UDim2.new(0.65, 0, 0, 5)
     ValLbl.BackgroundTransparency = 1
     ValLbl.Text = tostring(defaultVal)
-    ValLbl.TextColor3 = Color3.fromRGB(0, 150, 80)
+    ValLbl.TextColor3 = Color3.fromRGB(0, 220, 120)
     ValLbl.Font = Enum.Font.GothamBold
-    ValLbl.TextSize = 14
+    ValLbl.TextSize = 16
     ValLbl.TextXAlignment = Enum.TextXAlignment.Right
     ValLbl.Parent = Box
 
-    -- Линия (фон)
     local Track = Instance.new("Frame")
-    Track.Size = UDim2.new(0.9, 0, 0, 6)
-    Track.Position = UDim2.new(0.05, 0, 0, 38)
-    Track.BackgroundColor3 = Color3.fromRGB(180, 180, 180)
+    Track.Size = UDim2.new(0.9, 0, 0, 8)
+    Track.Position = UDim2.new(0.05, 0, 0, 45)
+    Track.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     Track.BorderSizePixel = 0
     Track.Parent = Box
 
@@ -229,10 +253,9 @@ local function createSlider(labelText, minVal, maxVal, defaultVal, callback)
     TC.CornerRadius = UDim.new(1, 0)
     TC.Parent = Track
 
-    -- Заполненная часть
     local Fill = Instance.new("Frame")
     Fill.Size = UDim2.new(0, 0, 1, 0)
-    Fill.BackgroundColor3 = Color3.fromRGB(0, 180, 90)
+    Fill.BackgroundColor3 = Color3.fromRGB(0, 200, 110)
     Fill.BorderSizePixel = 0
     Fill.Parent = Track
 
@@ -240,10 +263,9 @@ local function createSlider(labelText, minVal, maxVal, defaultVal, callback)
     FC.CornerRadius = UDim.new(1, 0)
     FC.Parent = Fill
 
-    -- Круглая точка
     local Knob = Instance.new("Frame")
-    Knob.Size = UDim2.new(0, 18, 0, 18)
-    Knob.Position = UDim2.new(0, -9, 0.5, -9)
+    Knob.Size = UDim2.new(0, 22, 0, 22)
+    Knob.Position = UDim2.new(0, -11, 0.5, -11)
     Knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Knob.BorderSizePixel = 0
     Knob.Parent = Track
@@ -253,22 +275,20 @@ local function createSlider(labelText, minVal, maxVal, defaultVal, callback)
     KC.Parent = Knob
 
     local KS = Instance.new("UIStroke")
-    KS.Color = Color3.fromRGB(0, 150, 80)
-    KS.Thickness = 2
+    KS.Color = Color3.fromRGB(0, 200, 110)
+    KS.Thickness = 3
     KS.Parent = Knob
 
-    -- Обновление позиции точки/значения
     local function updateFromValue(val)
         val = math.clamp(val, minVal, maxVal)
         local percent = (val - minVal) / (maxVal - minVal)
         Fill.Size = UDim2.new(percent, 0, 1, 0)
-        Knob.Position = UDim2.new(percent, -9, 0.5, -9)
+        Knob.Position = UDim2.new(percent, -11, 0.5, -11)
         ValLbl.Text = tostring(math.floor(val))
         callback(math.floor(val))
     end
 
-    -- Drag
-    local dragging = false
+    local draggingSlider = false
     local function handleInput(input)
         local trackPos = Track.AbsolutePosition.X
         local trackSize = Track.AbsoluteSize.X
@@ -280,93 +300,56 @@ local function createSlider(labelText, minVal, maxVal, defaultVal, callback)
 
     Track.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
+            draggingSlider = true
             handleInput(input)
         end
     end)
 
     Knob.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
+            draggingSlider = true
         end
     end)
 
     UserInputService.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        if draggingSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             handleInput(input)
         end
     end)
 
     UserInputService.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = false
+            draggingSlider = false
         end
     end)
 
-    -- Стартовое значение
     updateFromValue(defaultVal)
 end
 
 -- ================= СОЗДАЁМ ЭЛЕМЕНТЫ =================
-
 createToggle("🚗 Авто-Езда", function(s) State.AutoDrive = s end)
 createToggle("🔄 Авто-Стант", function(s) State.AutoStunt = s end)
-createToggle("⚡ Ускорение x3", function(s)
-    State.Boost = s
-end)
+createToggle("⚡ Ускорение x3", function(s) State.Boost = s end)
 createToggle("🕊️ Полёт", function(s) State.Fly = s end)
-createToggle("👻 NoClip", function(s)
-    State.NoClip = s
-    local char = LocalPlayer.Character
-    if char then
-        for _, p in pairs(char:GetDescendants()) do
-            if p:IsA("BasePart") and p.CanCollide then
-                p.CanCollide = not s
-            end
-        end
-    end
-end)
-createToggle("🛡️ God Mode", function(s)
-    State.GodMode = s
-    local char = LocalPlayer.Character
-    if char and char:FindFirstChildOfClass("Humanoid") then
-        char.Humanoid.MaxHealth = s and math.huge or 100
-        char.Humanoid.Health = s and math.huge or 100
-    end
-end)
+createToggle("👻 NoClip", function(s) State.NoClip = s end)
+createToggle("🛡️ God Mode", function(s) State.GodMode = s end)
 createToggle("💤 Anti-AFK", function(s) State.AntiAFK = s end)
 createToggle("🦘 Бесконечный прыжок", function(s) State.InfiniteJump = s end)
 
--- СЛАЙДЕР скорости
 createSlider("💨 Скорость ходьбы", WalkSpeedMin, WalkSpeedMax, WalkSpeedValue, function(val)
     WalkSpeedValue = val
-    if State.SpeedApply then
-        local char = LocalPlayer.Character
-        if char and char:FindFirstChildOfClass("Humanoid") then
-            char.Humanoid.WalkSpeed = val
-        end
-    end
-end)
-
--- Тумблер "Применять скорость"
-createToggle("✅ Применить скорость", function(s)
-    State.SpeedApply = s
-    local char = LocalPlayer.Character
-    if char and char:FindFirstChildOfClass("Humanoid") then
-        char.Humanoid.WalkSpeed = s and WalkSpeedValue or 16
-    end
+    State.SpeedApply = true
 end)
 
 createToggle("🎪 Авто-Флип", function(s) State.AutoFlip = s end)
 
 -- Обновление CanvasSize
 ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    Scroll.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 16)
+    Scroll.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 20)
 end)
 
 -- ================= ЛОГИКА =================
 
--- Anti-AFK
 task.spawn(function()
     local vu = game:GetService("VirtualUser")
     LocalPlayer.Idled:Connect(function()
@@ -377,7 +360,6 @@ task.spawn(function()
     end)
 end)
 
--- Бесконечный прыжок
 UserInputService.InputBegan:Connect(function(input, gpe)
     if gpe then return end
     if State.InfiniteJump and input.KeyCode == Enum.KeyCode.Space then
@@ -388,15 +370,13 @@ UserInputService.InputBegan:Connect(function(input, gpe)
     end
 end)
 
--- Основной цикл
 RunService.Heartbeat:Connect(function()
     local char = LocalPlayer.Character
     if not char then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
 
-    -- Постоянно применяем скорость
-    if State.SpeedApply then
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if hum and hum.WalkSpeed ~= WalkSpeedValue then
+    if State.SpeedApply and hum then
+        if hum.WalkSpeed ~= WalkSpeedValue then
             hum.WalkSpeed = WalkSpeedValue
         end
     end
@@ -405,18 +385,23 @@ RunService.Heartbeat:Connect(function()
         for _, p in pairs(char:GetDescendants()) do
             if p:IsA("BasePart") then p.CanCollide = false end
         end
+        local seat = char:FindFirstChildWhichIsA("VehicleSeat")
+        if seat and seat.Parent then
+            for _, p in pairs(seat.Parent:GetDescendants()) do
+                if p:IsA("BasePart") then p.CanCollide = false end
+            end
+        end
     end
 
-    if State.GodMode then
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if hum then
-            hum.MaxHealth = math.huge
-            hum.Health = math.huge
-        end
+    if State.GodMode and hum then
+        hum.MaxHealth = math.huge
+        hum.Health = math.huge
     end
 
     local seat = char:FindFirstChildWhichIsA("VehicleSeat")
     if not seat then return end
+    local body = seat.Parent and seat.Parent:FindFirstChildWhichIsA("BasePart")
+    if not body then return end
 
     if State.AutoDrive then
         if seat.Velocity.Magnitude < CONFIG.AutoDriveSpeed then
@@ -429,39 +414,30 @@ RunService.Heartbeat:Connect(function()
     end
 
     if State.AutoStunt then
-        local body = seat.Parent and seat.Parent:FindFirstChildWhichIsA("BasePart")
-        if body then
-            body.Velocity = body.Velocity + Vector3.new(0, CONFIG.StuntForce, 0)
-            body.RotVelocity = body.RotVelocity + Vector3.new(0, 10, 0)
-        end
+        body.Velocity = body.Velocity + Vector3.new(0, 150, 0)
+        body.RotVelocity = body.RotVelocity + Vector3.new(0, 15, 0)
     end
 
     if State.AutoFlip then
-        local body = seat.Parent and seat.Parent:FindFirstChildWhichIsA("BasePart")
-        if body then
-            body.RotVelocity = body.RotVelocity + Vector3.new(15, 0, 0)
-        end
+        body.RotVelocity = body.RotVelocity + Vector3.new(20, 0, 0)
     end
 
     if State.Fly then
-        local body = seat.Parent and seat.Parent:FindFirstChildWhichIsA("BasePart")
-        if body then
-            local dir = Vector3.new(0, 0, 0)
-            local cam = workspace.CurrentCamera
-            if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-                dir = dir + cam.CFrame.LookVector
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-                dir = dir - cam.CFrame.LookVector
-            end
-            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-                dir = dir + Vector3.new(0, 1, 0)
-            end
-            if dir.Magnitude > 0 then
-                body.Velocity = dir.Unit * CONFIG.FlySpeed
-            end
+        local dir = Vector3.new(0, 0, 0)
+        local cam = workspace.CurrentCamera
+        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+            dir = dir + cam.CFrame.LookVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+            dir = dir - cam.CFrame.LookVector
+        end
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+            dir = dir + Vector3.new(0, 1, 0)
+        end
+        if dir.Magnitude > 0 then
+            body.Velocity = dir.Unit * CONFIG.FlySpeed
         end
     end
 end)
 
-print("✅ Kukirin Premium v3 загружено! Слайдер скорости готов.")
+print("✅ Kukirin Menu v2 загружено! Чёрный = выкл, Белый = вкл")
