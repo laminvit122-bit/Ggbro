@@ -1,5 +1,5 @@
--- == KUKIRIN MENU v4 ==
--- Центрированное меню + рабочий скролл
+-- == KUKIRIN FINAL MENU ==
+-- Всегда по центру + рабочий скролл + рабочие функции
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -33,16 +33,17 @@ local State = {
 
 -- ================= GUI =================
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "KukirinMenuV4"
+ScreenGui.Name = "KukirinFinal"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
--- МЕНЮ: меньше по высоте, чтобы точно влезло и было по центру
+-- МЕНЮ: высота 400, чтобы гарантированно влезло
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 320, 0, 420)
-MainFrame.Position = UDim2.new(0.5, -160, 0.5, -210)
+MainFrame.Size = UDim2.new(0, 310, 0, 400)
+-- ВСЕГДА ПО ЦЕНТРУ
+MainFrame.Position = UDim2.new(0.5, -155, 0.5, -200)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 MainFrame.BackgroundTransparency = 0.05
 MainFrame.BorderSizePixel = 0
@@ -68,7 +69,7 @@ local function updateDrag(input)
     MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 end
 
--- Верхняя панель (за неё таскаем)
+-- Заголовок (за него таскаем)
 local TitleBar = Instance.new("Frame")
 TitleBar.Size = UDim2.new(1, 0, 0, 42)
 TitleBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
@@ -98,7 +99,7 @@ end)
 local TitleLabel = Instance.new("TextLabel")
 TitleLabel.Size = UDim2.new(1, 0, 1, 0)
 TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "⚡ KUKIRIN MENU"
+TitleLabel.Text = "⚡ KUKIRIN"
 TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleLabel.Font = Enum.Font.GothamBold
 TitleLabel.TextSize = 16
@@ -112,27 +113,25 @@ Scroll.BackgroundTransparency = 1
 Scroll.BorderSizePixel = 0
 Scroll.ScrollBarThickness = 5
 Scroll.ScrollBarImageColor3 = Color3.fromRGB(0, 200, 110)
-Scroll.ScrollBarImageTransparency = 0
 Scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-Scroll.ScrollingDirection = Enum.ScrollingDirection.Y
 Scroll.Parent = MainFrame
 
 local ListLayout = Instance.new("UIListLayout")
-ListLayout.Padding = UDim.new(0, 8)
+ListLayout.Padding = UDim.new(0, 7)
 ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 ListLayout.Parent = Scroll
 
 local Pad = Instance.new("UIPadding")
-Pad.PaddingTop = UDim.new(0, 10)
-Pad.PaddingLeft = UDim.new(0, 10)
-Pad.PaddingRight = UDim.new(0, 10)
-Pad.PaddingBottom = UDim.new(0, 10)
+Pad.PaddingTop = UDim.new(0, 8)
+Pad.PaddingLeft = UDim.new(0, 8)
+Pad.PaddingRight = UDim.new(0, 8)
+Pad.PaddingBottom = UDim.new(0, 8)
 Pad.Parent = Scroll
 
 -- ================= ТУМБЛЕР =================
 local function createToggle(text, callback)
     local Toggle = Instance.new("TextButton")
-    Toggle.Size = UDim2.new(1, 0, 0, 46)
+    Toggle.Size = UDim2.new(1, 0, 0, 44)
     Toggle.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     Toggle.Text = ""
     Toggle.AutoButtonColor = false
@@ -198,7 +197,7 @@ end
 -- ================= СЛАЙДЕР =================
 local function createSlider(labelText, minVal, maxVal, defaultVal, callback)
     local Box = Instance.new("Frame")
-    Box.Size = UDim2.new(1, 0, 0, 68)
+    Box.Size = UDim2.new(1, 0, 0, 64)
     Box.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     Box.BorderSizePixel = 0
     Box.Parent = Scroll
@@ -213,8 +212,8 @@ local function createSlider(labelText, minVal, maxVal, defaultVal, callback)
     BS.Parent = Box
 
     local Lbl = Instance.new("TextLabel")
-    Lbl.Size = UDim2.new(0.6, 0, 0, 25)
-    Lbl.Position = UDim2.new(0.05, 0, 0, 5)
+    Lbl.Size = UDim2.new(0.6, 0, 0, 22)
+    Lbl.Position = UDim2.new(0.05, 0, 0, 4)
     Lbl.BackgroundTransparency = 1
     Lbl.Text = labelText
     Lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -224,8 +223,8 @@ local function createSlider(labelText, minVal, maxVal, defaultVal, callback)
     Lbl.Parent = Box
 
     local ValLbl = Instance.new("TextLabel")
-    ValLbl.Size = UDim2.new(0.3, 0, 0, 25)
-    ValLbl.Position = UDim2.new(0.65, 0, 0, 5)
+    ValLbl.Size = UDim2.new(0.3, 0, 0, 22)
+    ValLbl.Position = UDim2.new(0.65, 0, 0, 4)
     ValLbl.BackgroundTransparency = 1
     ValLbl.Text = tostring(defaultVal)
     ValLbl.TextColor3 = Color3.fromRGB(0, 220, 120)
@@ -236,7 +235,7 @@ local function createSlider(labelText, minVal, maxVal, defaultVal, callback)
 
     local Track = Instance.new("Frame")
     Track.Size = UDim2.new(0.9, 0, 0, 8)
-    Track.Position = UDim2.new(0.05, 0, 0, 43)
+    Track.Position = UDim2.new(0.05, 0, 0, 40)
     Track.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
     Track.BorderSizePixel = 0
     Track.Parent = Box
@@ -335,7 +334,7 @@ end)
 
 createToggle("🎪 Авто-Флип", function(s) State.AutoFlip = s end)
 
--- Автоматически обновляем высоту скролла
+-- Обновление высоты скролла
 ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     Scroll.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 20)
 end)
@@ -362,7 +361,6 @@ UserInputService.InputBegan:Connect(function(input, gpe)
     end
 end)
 
--- Поиск транспорта
 local function getVehicle()
     local char = LocalPlayer.Character
     if not char then return nil, nil end
@@ -462,4 +460,4 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
-print("✅ Kukirin Menu v4 загружено! Скролл справа работает.")
+print("✅ Kukirin Final Menu загружено!")
