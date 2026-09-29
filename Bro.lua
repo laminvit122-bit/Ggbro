@@ -1,5 +1,5 @@
--- == KUKIRIN FIXED SCRIPT v2 ==
--- Тёмная тема: выкл = чёрный, вкл = белый
+-- == KUKIRIN MENU v3 ==
+-- Меню ровно по центру + рабочие функции
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -9,9 +9,10 @@ local LocalPlayer = Players.LocalPlayer
 
 -- ================= НАСТРОЙКИ =================
 local CONFIG = {
-    AutoDriveSpeed = 100,
-    BoostSpeed     = 300,
-    FlySpeed       = 150,
+    AutoDriveSpeed = 120,
+    BoostSpeed     = 400,
+    FlySpeed       = 180,
+    JumpPower      = 150,
 }
 
 local WalkSpeedValue = 16
@@ -33,14 +34,16 @@ local State = {
 
 -- ================= GUI =================
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "KukirinFixedV2"
+ScreenGui.Name = "KukirinMenuV3"
 ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 360, 0, 560)
-MainFrame.Position = UDim2.new(0.5, -180, 0.5, -280)
+MainFrame.Size = UDim2.new(0, 340, 0, 500)
+-- РОВНО ПО ЦЕНТРУ ЭКРАНА
+MainFrame.Position = UDim2.new(0.5, -170, 0.5, -250)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 MainFrame.BackgroundTransparency = 0.05
 MainFrame.BorderSizePixel = 0
@@ -67,12 +70,13 @@ local function updateDrag(input)
 end
 
 local TitleBar = Instance.new("Frame")
-TitleBar.Size = UDim2.new(1, 0, 0, 45)
+TitleBar.Size = UDim2.new(1, 0, 0, 50)
 TitleBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 TitleBar.BorderSizePixel = 0
 TitleBar.Active = true
 TitleBar.Parent = MainFrame
 
+-- ВАЖНО: чтобы таскать, надо чтобы TitleBar не был перекрыт кнопками
 TitleBar.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
@@ -95,16 +99,16 @@ end)
 local TitleLabel = Instance.new("TextLabel")
 TitleLabel.Size = UDim2.new(1, 0, 1, 0)
 TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "⚡ KUKIRIN MENU v2"
+TitleLabel.Text = "⚡ KUKIRIN MENU"
 TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 TitleLabel.Font = Enum.Font.GothamBold
-TitleLabel.TextSize = 16
+TitleLabel.TextSize = 17
 TitleLabel.Parent = TitleBar
 
 -- ================= СКРОЛЛ =================
 local Scroll = Instance.new("ScrollingFrame")
-Scroll.Size = UDim2.new(1, 0, 1, -45)
-Scroll.Position = UDim2.new(0, 0, 0, 45)
+Scroll.Size = UDim2.new(1, 0, 1, -50)
+Scroll.Position = UDim2.new(0, 0, 0, 50)
 Scroll.BackgroundTransparency = 1
 Scroll.BorderSizePixel = 0
 Scroll.ScrollBarThickness = 4
@@ -124,11 +128,10 @@ Pad.PaddingRight = UDim.new(0, 10)
 Pad.PaddingBottom = UDim.new(0, 10)
 Pad.Parent = Scroll
 
--- ================= ТУМБЛЕР (ЧЁРНЫЙ ВЫКЛ / БЕЛЫЙ ВКЛ) =================
+-- ================= ТУМБЛЕР =================
 local function createToggle(text, callback)
     local Toggle = Instance.new("TextButton")
-    Toggle.Size = UDim2.new(1, 0, 0, 45)
-    -- ИЗНАЧАЛЬНО ЧЁРНЫЙ
+    Toggle.Size = UDim2.new(1, 0, 0, 48)
     Toggle.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     Toggle.Text = ""
     Toggle.AutoButtonColor = false
@@ -144,7 +147,6 @@ local function createToggle(text, callback)
     S.Thickness = 1
     S.Parent = Toggle
 
-    -- ТЕКСТ ИЗНАЧАЛЬНО БЕЛЫЙ
     local L = Instance.new("TextLabel")
     L.Size = UDim2.new(0.7, 0, 1, 0)
     L.Position = UDim2.new(0.05, 0, 0, 0)
@@ -156,7 +158,6 @@ local function createToggle(text, callback)
     L.TextXAlignment = Enum.TextXAlignment.Left
     L.Parent = Toggle
 
-    -- СТАТУС ИЗНАЧАЛЬНО СЕРЫЙ
     local St = Instance.new("TextLabel")
     St.Size = UDim2.new(0.2, 0, 1, 0)
     St.Position = UDim2.new(0.75, 0, 0, 0)
@@ -174,36 +175,26 @@ local function createToggle(text, callback)
         callback(state)
 
         if state then
-            -- ВКЛЮЧЕНО: плавно в БЕЛЫЙ
-            TweenService:Create(Toggle, TweenInfo.new(0.35, Enum.EasingStyle.Quad), {
+            TweenService:Create(Toggle, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
                 BackgroundColor3 = Color3.fromRGB(240, 240, 240)
             }):Play()
-            TweenService:Create(S, TweenInfo.new(0.35), {
-                Color = Color3.fromRGB(0, 220, 120)
-            }):Play()
-            TweenService:Create(L, TweenInfo.new(0.35), {
-                TextColor3 = Color3.fromRGB(20, 20, 20)
-            }):Play()
+            TweenService:Create(S, TweenInfo.new(0.3), {Color = Color3.fromRGB(0, 220, 120)}):Play()
+            TweenService:Create(L, TweenInfo.new(0.3), {TextColor3 = Color3.fromRGB(20,20,20)}):Play()
             St.Text = "ВКЛ"
             St.TextColor3 = Color3.fromRGB(0, 180, 100)
         else
-            -- ВЫКЛЮЧЕНО: плавно в ЧЁРНЫЙ
-            TweenService:Create(Toggle, TweenInfo.new(0.35, Enum.EasingStyle.Quad), {
+            TweenService:Create(Toggle, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
                 BackgroundColor3 = Color3.fromRGB(20, 20, 20)
             }):Play()
-            TweenService:Create(S, TweenInfo.new(0.35), {
-                Color = Color3.fromRGB(80, 80, 80)
-            }):Play()
-            TweenService:Create(L, TweenInfo.new(0.35), {
-                TextColor3 = Color3.fromRGB(255, 255, 255)
-            }):Play()
+            TweenService:Create(S, TweenInfo.new(0.3), {Color = Color3.fromRGB(80,80,80)}):Play()
+            TweenService:Create(L, TweenInfo.new(0.3), {TextColor3 = Color3.fromRGB(255,255,255)}):Play()
             St.Text = "ВЫКЛ"
             St.TextColor3 = Color3.fromRGB(150, 150, 150)
         end
     end)
 end
 
--- ================= СЛАЙДЕР (тоже тёмный) =================
+-- ================= СЛАЙДЕР =================
 local function createSlider(labelText, minVal, maxVal, defaultVal, callback)
     local Box = Instance.new("Frame")
     Box.Size = UDim2.new(1, 0, 0, 70)
@@ -348,8 +339,9 @@ ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     Scroll.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 20)
 end)
 
--- ================= ЛОГИКА =================
+-- ================= ЛОГИКА (ИСПРАВЛЕННАЯ) =================
 
+-- Anti-AFK
 task.spawn(function()
     local vu = game:GetService("VirtualUser")
     LocalPlayer.Idled:Connect(function()
@@ -360,6 +352,7 @@ task.spawn(function()
     end)
 end)
 
+-- Бесконечный прыжок (работает всегда, когда включён)
 UserInputService.InputBegan:Connect(function(input, gpe)
     if gpe then return end
     if State.InfiniteJump and input.KeyCode == Enum.KeyCode.Space then
@@ -370,22 +363,55 @@ UserInputService.InputBegan:Connect(function(input, gpe)
     end
 end)
 
+-- Функция поиска транспорта (ищет и в персонаже, и рядом)
+local function getVehicle()
+    local char = LocalPlayer.Character
+    if not char then return nil, nil end
+
+    -- Сначала ищем в персонаже
+    local seat = char:FindFirstChildWhichIsA("VehicleSeat")
+    if not seat then
+        -- Если нет — ищем ближайший VehicleSeat к персонажу
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            local closest, dist = nil, 30 -- радиус поиска 30 стадов
+            for _, obj in pairs(workspace:GetDescendants()) do
+                if obj:IsA("VehicleSeat") then
+                    local d = (obj.Position - hrp.Position).Magnitude
+                    if d < dist then
+                        dist = d
+                        closest = obj
+                    end
+                end
+            end
+            seat = closest
+        end
+    end
+
+    if not seat then return nil, nil end
+    local body = seat.Parent and seat.Parent:FindFirstChildWhichIsA("BasePart")
+    return seat, body
+end
+
+-- Основной цикл
 RunService.Heartbeat:Connect(function()
     local char = LocalPlayer.Character
     if not char then return end
     local hum = char:FindFirstChildOfClass("Humanoid")
 
+    -- 1. Скорость ходьбы
     if State.SpeedApply and hum then
         if hum.WalkSpeed ~= WalkSpeedValue then
             hum.WalkSpeed = WalkSpeedValue
         end
     end
 
+    -- 2. NoClip (для персонажа и транспорта)
     if State.NoClip then
         for _, p in pairs(char:GetDescendants()) do
             if p:IsA("BasePart") then p.CanCollide = false end
         end
-        local seat = char:FindFirstChildWhichIsA("VehicleSeat")
+        local seat, body = getVehicle()
         if seat and seat.Parent then
             for _, p in pairs(seat.Parent:GetDescendants()) do
                 if p:IsA("BasePart") then p.CanCollide = false end
@@ -393,35 +419,47 @@ RunService.Heartbeat:Connect(function()
         end
     end
 
+    -- 3. God Mode
     if State.GodMode and hum then
         hum.MaxHealth = math.huge
         hum.Health = math.huge
     end
 
-    local seat = char:FindFirstChildWhichIsA("VehicleSeat")
-    if not seat then return end
-    local body = seat.Parent and seat.Parent:FindFirstChildWhichIsA("BasePart")
-    if not body then return end
+    -- 4. Бесконечный прыжок (если игрок держит пробел)
+    if State.InfiniteJump and hum and UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+        if hum:GetState() ~= Enum.HumanoidStateType.Jumping then
+            hum:ChangeState(Enum.HumanoidStateType.Jumping)
+        end
+    end
 
+    -- Логика скутера
+    local seat, body = getVehicle()
+    if not seat or not body then return end
+
+    -- 5. Авто-Езда
     if State.AutoDrive then
         if seat.Velocity.Magnitude < CONFIG.AutoDriveSpeed then
             seat.Velocity = seat.CFrame.LookVector * CONFIG.AutoDriveSpeed
         end
     end
 
+    -- 6. Ускорение x3
     if State.Boost then
         seat.Velocity = seat.CFrame.LookVector * CONFIG.BoostSpeed
     end
 
+    -- 7. Авто-Стант
     if State.AutoStunt then
-        body.Velocity = body.Velocity + Vector3.new(0, 150, 0)
+        body.Velocity = body.Velocity + Vector3.new(0, 100, 0)
         body.RotVelocity = body.RotVelocity + Vector3.new(0, 15, 0)
     end
 
+    -- 8. Авто-Флип
     if State.AutoFlip then
         body.RotVelocity = body.RotVelocity + Vector3.new(20, 0, 0)
     end
 
+    -- 9. Полёт (работает если сидишь в скутере)
     if State.Fly then
         local dir = Vector3.new(0, 0, 0)
         local cam = workspace.CurrentCamera
@@ -434,10 +472,13 @@ RunService.Heartbeat:Connect(function()
         if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
             dir = dir + Vector3.new(0, 1, 0)
         end
+        if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+            dir = dir - Vector3.new(0, 1, 0)
+        end
         if dir.Magnitude > 0 then
             body.Velocity = dir.Unit * CONFIG.FlySpeed
         end
     end
 end)
 
-print("✅ Kukirin Menu v2 загружено! Чёрный = выкл, Белый = вкл")
+print("✅ Kukirin Menu v3 загружено! Меню по центру, таскается за верхнюю панель.")
